@@ -1,0 +1,40 @@
+version: "3"
+services:
+  cashe:
+    image: 'redis'
+    restart: always
+    volumes:
+      - cashe:/data
+    ports: 
+      - "6379:6379"
+  db: 
+    image: 'postgres'
+    ports:
+      - "5432:5432"
+    environment: 
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 999991
+      POSTGRES_DB: education
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data  
+  express-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    depends_on:
+      - cashe
+      - db
+    ports: 
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      REDIS_HOST: cashe
+      REDIS_PORT: 6379
+      DATABASE_HOST: db
+volumes:
+  cashe:
+    driver: local    
+  db:
+    driver: local
+  
